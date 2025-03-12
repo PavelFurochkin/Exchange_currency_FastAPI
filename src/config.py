@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from pydantic import BaseSettings
-from pydantic_settings import SettingsConfigDict
+from pydantic_settings import SettingsConfigDict, BaseSettings
 
 
 class Setting(BaseSettings):
