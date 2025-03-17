@@ -1,10 +1,10 @@
 from decimal import Decimal
 
-from src.schemas.base import BaseSchema
+from src.schemas.base_scheme import BaseSchema
 from typing import Annotated
 from pydantic import Field, PositiveInt, field_serializer
 
-from src.schemas.currencies import CurrencySchema
+from src.schemas.currency_schemas import CurrencySchema
 
 
 class ExchangeSchemasIn(BaseSchema):
@@ -12,8 +12,8 @@ class ExchangeSchemasIn(BaseSchema):
     Класс для передачи данных в БД
     """
     id: PositiveInt
-    base_currencies: Annotated[CurrencySchema, Field(..., description='Базовая валюта')]
-    target_currencies: Annotated[CurrencySchema, Field(..., description='Целевая валюта')]
+    base_currencies_id: Annotated[int, Field(..., description='ID базовой валюты')]
+    target_currencies_id: Annotated[int, Field(..., description='ID целевой валюты')]
     rate: Annotated[Decimal, Field(..., max_length=9, min_length=6, gt=0)]
 
 

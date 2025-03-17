@@ -1,6 +1,6 @@
 from sqlalchemy import String
 
-from src.models.base import Base
+from src.models.base_model import Base
 
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -9,7 +9,7 @@ class Currency(Base):
     """
     Модель SQLAlchemy для валюты
     """
-    __tablename__ = "currency"
+    __tablename__ = "currencies"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     code: Mapped[str] = mapped_column(String(3), index=True, unique=True, nullable=False)

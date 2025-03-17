@@ -1,4 +1,4 @@
-from src.schemas.base import BaseSchema
+from src.schemas.base_scheme import BaseSchema
 from typing import Annotated
 from pydantic import Field, PositiveInt
 
@@ -11,4 +11,3 @@ class CurrencySchema(BaseSchema):
     code: Annotated[str, Field(gt=2, lt=4, description="Код валюты")]
     name: Annotated[str, Field(gt=2, lt=25, description="Полное имя валюты")]
     sign: Annotated[str, Field(gt=0, lt=4, description="Символ валюты")]
-

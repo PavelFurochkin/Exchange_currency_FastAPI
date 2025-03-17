@@ -1,10 +1,10 @@
 from decimal import Decimal
 
-from src.schemas.base import BaseSchema
+from src.schemas.base_scheme import BaseSchema
 from typing import Annotated
 from pydantic import Field
 
-from src.schemas.currencies import CurrencySchema
+from src.schemas.currency_schemas import CurrencySchema
 
 
 class ExchangeRateSchema(BaseSchema):
