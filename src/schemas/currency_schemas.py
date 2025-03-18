@@ -8,6 +8,6 @@ class CurrencySchema(BaseSchema):
     Класс для передачи данных о валюте
     """
     id: PositiveInt
-    code: Annotated[str, Field(gt=2, lt=4, description="Код валюты")]
-    name: Annotated[str, Field(gt=2, lt=25, description="Полное имя валюты")]
-    sign: Annotated[str, Field(gt=0, lt=4, description="Символ валюты")]
+    code: Annotated[str, Field(min_length=3, max_length=3, description="Код валюты")]
+    name: Annotated[str, Field(min_length=3, max_length=25, description="Полное имя валюты")]
+    sign: Annotated[str, Field(min_length=1, max_length=3, description="Символ валюты")]

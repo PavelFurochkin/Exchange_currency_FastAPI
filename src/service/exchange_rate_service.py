@@ -1,12 +1,15 @@
 from decimal import Decimal
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DAO.currency_repository import CurrencyRepository
-from DAO.exchange_repository import ExchangeRepository
-from schemas.currency_schemas import CurrencySchema
-from schemas.exchange_rate_schemas import ExchangeSchemasOut, ExchangeSchemasIn
+from src.DAO.currency_repository import CurrencyRepository
+from src.DAO.exchange_repository import ExchangeRepository
+from src.schemas.currency_schemas import CurrencySchema
+from src.schemas.exchange_rate_schemas import ExchangeSchemasOut
+from src.schemas.exchange_schemas import ExchangeRateSchema
+from src.exceptions import exceptions
 
 
 class ExchangeRateService:
@@ -20,7 +23,8 @@ class ExchangeRateService:
             base_code: str,
             target_code: str,
     ) -> ExchangeSchemasOut:
-        await self._validate_currency_codes(session, base_code, target_code)
+        base_currency = await self._validate_currency_code(session, base_code)
+        target_currency = await self._validate_currency_code(session, target_code)
 
         # Прямой курс
         direct_rate = await self.exchange_repo.get_by_currency_codes(session, base_code, target_code)
@@ -32,9 +36,9 @@ class ExchangeRateService:
         if reverse_rate:
             return ExchangeSchemasOut(
                 id=reverse_rate.id,
-                base_currencies=reverse_rate.target_currency,
-                target_currencies=reverse_rate.base_currency,
-                rate=(Decimal(1)/reverse_rate.rate).quantize(Decimal(0.001))
+                base_currency=reverse_rate.target_currency,
+                target_currency=reverse_rate.base_currency,
+                rate=(Decimal(1) / reverse_rate.rate).quantize(Decimal(0.001))
             )
 
         # Конвертация через USD
@@ -42,8 +46,8 @@ class ExchangeRateService:
         if usd_rate:
             return ExchangeSchemasOut(
                 id=0,
-                base_currencies=CurrencySchema.model_validate(base_code),
-                target_currencies=CurrencySchema.model_validate(target_code),
+                base_currency=CurrencySchema.model_validate(base_currency),
+                target_currency=CurrencySchema.model_validate(target_currency),
                 rate=usd_rate,
             )
 
@@ -52,34 +56,41 @@ class ExchangeRateService:
     async def _get_rate_via_usd(self, session: AsyncSession, base_code: str, target_code: str) -> Decimal | None:
         usd_code = 'USD'
 
-        base_to_usd = await self._get_any_rate(session, base_code, usd_code)
+        base_to_usd = await self.exchange_repo.get_by_currency_codes(session, base_code, usd_code)
         if not base_to_usd:
             return None
 
-        usd_to_target = await self._get_any_rate(session, usd_code, target_code)
+        usd_to_target = await self.exchange_repo.get_by_currency_codes(session, usd_code, target_code)
         if not usd_to_target:
             return None
 
-        return (base_to_usd * usd_to_target).quantize(Decimal(0.000001))
+        return (base_to_usd.rate * usd_to_target.rate).quantize(Decimal(0.000001))
 
-    async def _get_any_rate(self, session: AsyncSession, base_code: str, target_code: str) -> Decimal | None:
-        """Получает курс в любом направлении"""
-        rate = await self.exchange_repo.get_by_currency_codes(session, base_code, target_code)
-        if rate:
-            return rate.rate
+    async def _validate_currency_code(self, session: AsyncSession, code: str) -> CurrencySchema:
+        try:
+            currency = await self.currency_repo.get_by_code(session, code)
+            return CurrencySchema.model_validate(currency)
+        except ValidationError:
+            raise exceptions.CurrencyAccessError(code)
 
-        reverse_rate = await self.exchange_repo.get_by_currency_codes(session, target_code, base_code)
-        if reverse_rate:
-            return Decimal(1) / reverse_rate.rate
-
-        return None
-
-    async def _validate_currency_codes(self, session: AsyncSession, *codes: str) -> None:
-        for code in codes:
-            if not await self.currency_repo.get_by_code(session, code):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'Валюта {code} не найдена'
-                )
-
-
+    async def get_convert(
+            self,
+            session: AsyncSession,
+            amount: Decimal,
+            base_code: str,
+            target_code: str
+    ) -> ExchangeRateSchema:
+        try:
+            base_currency = await self._validate_currency_code(session, base_code)
+            target_currency = await self._validate_currency_code(session, target_code)
+            rate = await self.get_rate(session, base_code, target_code)
+            amount_converted = rate.rate * amount
+            return ExchangeRateSchema(
+                base_currency=base_currency,
+                target_currency=target_currency,
+                rate=rate.rate,
+                amount=amount,
+                converted_amount=amount_converted
+            )
+        except ValidationError:
+            raise exceptions.ExchangeRateNotExistError()

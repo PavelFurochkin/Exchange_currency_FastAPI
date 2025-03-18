@@ -9,7 +9,7 @@ class Currency(Base):
     """
     Модель SQLAlchemy для валюты
     """
-    __tablename__ = "currencies"
+    __tablename__ = "currency"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     code: Mapped[str] = mapped_column(String(3), index=True, unique=True, nullable=False)

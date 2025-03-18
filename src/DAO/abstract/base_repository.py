@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, cast
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, Select
 from sqlalchemy.exc import NoResultFound
 
 T = TypeVar('T')  # Тип модели SQLAlchemy
@@ -24,7 +24,7 @@ class BaseRepository(ABC, Generic[T, S]):
         """Получить все объекты."""
         stmt = select(self._get_model())
         result = await session.execute(stmt)
-        return result.scalar().all()
+        return cast(list[T], result.scalars().all())
 
     async def create(self, session: AsyncSession, data: S) -> T:
         """Создать новый объект."""
@@ -34,9 +34,6 @@ class BaseRepository(ABC, Generic[T, S]):
         await session.refresh(obj)
         return obj
 
-    async def __update(self, session: AsyncSession, id: int, data: S) -> T:
-            pass
-
     async def delete(self, session: AsyncSession, id: int) -> None:
         """Удалить объект."""
         obj = await self.get_by_id(session, id)
@@ -44,7 +41,3 @@ class BaseRepository(ABC, Generic[T, S]):
             raise NoResultFound(f'{self._get_model().__name__} c id = {id} не найден')
         await session.delete(obj)
         await session.commit()
-
-
-
-

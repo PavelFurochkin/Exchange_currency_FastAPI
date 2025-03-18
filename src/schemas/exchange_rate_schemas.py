@@ -12,9 +12,9 @@ class ExchangeSchemasIn(BaseSchema):
     Класс для передачи данных в БД
     """
     id: PositiveInt
-    base_currencies_id: Annotated[int, Field(..., description='ID базовой валюты')]
-    target_currencies_id: Annotated[int, Field(..., description='ID целевой валюты')]
-    rate: Annotated[Decimal, Field(..., max_length=9, min_length=6, gt=0)]
+    base_currency_id: Annotated[int, Field(..., description='ID базовой валюты')]
+    target_currency_id: Annotated[int, Field(..., description='ID целевой валюты')]
+    rate: Annotated[Decimal, Field(..., max_digits=9, gt=0, decimal_places=6)]
 
 
 class ExchangeSchemasOut(BaseSchema):
@@ -22,9 +22,9 @@ class ExchangeSchemasOut(BaseSchema):
     Класс для корректного отображения полей в документации и округления до сотых
     """
     id: PositiveInt
-    base_currencies: Annotated[CurrencySchema, Field(serialization_alias='baseCurrency')]
-    target_currencies: Annotated[CurrencySchema, Field(serialization_alias='targetCurrency')]
-    rate: Annotated[Decimal, Field(max_length=9, min_length=6, gt=0)]
+    base_currency: Annotated[CurrencySchema, Field(serialization_alias='baseCurrency')]
+    target_currency: Annotated[CurrencySchema, Field(serialization_alias='targetCurrency')]
+    rate: Annotated[Decimal, Field(max_digits=9, gt=0, decimal_places=6)]
 
     @field_serializer("rate")
     def format_rate(self, value: Decimal) -> Decimal:
