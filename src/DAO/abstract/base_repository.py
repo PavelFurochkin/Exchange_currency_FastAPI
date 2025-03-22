@@ -20,6 +20,12 @@ class BaseRepository(ABC, Generic[T, S]):
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_code(self, session: AsyncSession, code: str) -> T | None:
+        """Получить объект по ID"""
+        stmt = select(self._get_model()).where(self._get_model().code == code)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def get_all(self, session: AsyncSession) -> list[T]:
         """Получить все объекты."""
         stmt = select(self._get_model())

@@ -7,9 +7,19 @@ from pydantic import Field, PositiveInt, field_serializer
 from src.schemas.currency_schemas import CurrencySchema
 
 
+class ExchangeSchemasCodeIn(BaseSchema):
+    """
+    Класс с code для получения данных из БД
+    """
+    id: PositiveInt
+    base_currency_code: Annotated[str, Field(..., min_length=3, max_length=3) ]
+    target_currency_code: Annotated[str, Field(..., min_length=3, max_length=3)]
+    rate: Annotated[Decimal, Field(..., max_digits=9, gt=0, decimal_places=6)]
+
+
 class ExchangeSchemasIn(BaseSchema):
     """
-    Класс для передачи данных в БД
+    Класс с id для передачи данных в БД
     """
     id: PositiveInt
     base_currency_id: Annotated[int, Field(..., description='ID базовой валюты')]

@@ -2,12 +2,13 @@ from decimal import Decimal
 
 from fastapi import HTTPException
 from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.DAO.currency_repository import CurrencyRepository
 from src.DAO.exchange_repository import ExchangeRepository
 from src.schemas.currency_schemas import CurrencySchema
-from src.schemas.exchange_rate_schemas import ExchangeSchemasOut
+from src.schemas.exchange_rate_schemas import ExchangeSchemasOut, ExchangeSchemasCodeIn
 from src.schemas.exchange_schemas import ExchangeRateSchema
 from src.exceptions import exceptions
 
@@ -93,4 +94,34 @@ class ExchangeRateService:
                 converted_amount=amount_converted
             )
         except ValidationError:
-            raise exceptions.ExchangeRateNotExistError()
+            raise exceptions.ExchangeRateNotExistError(base_code, target_code)
+
+    async def get_all_rate(self, session: AsyncSession) -> list[ExchangeSchemasOut]:
+        rates = await self.exchange_repo.get_all(session)
+        return [ExchangeSchemasOut.model_validate(rate) for rate in rates]
+
+    async def create_exchange_rate(
+            self,
+            session: AsyncSession,
+            exchange_rate: ExchangeSchemasCodeIn
+    ) -> ExchangeSchemasOut:
+        try:
+            create_exchange_rate = await self.exchange_repo.create(session, exchange_rate)
+            return ExchangeSchemasOut.model_validate(create_exchange_rate)
+        except IntegrityError:
+            raise exceptions.AlreadyExistError()
+
+    async def update_exchange_rate(
+            self,
+            session: AsyncSession,
+            base_code: str,
+            target_code: str,
+            new_rate: Decimal,
+    ) -> ExchangeSchemasOut:
+        new_exchange_rate = await self.exchange_repo.update_rate_by_currencies_codes(
+            session,
+            base_code,
+            target_code,
+            new_rate
+        )
+        return ExchangeSchemasOut.model_validate(new_exchange_rate)
