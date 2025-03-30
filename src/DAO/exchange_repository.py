@@ -5,8 +5,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from exceptions.exceptions import ExchangeRateNotExistError, DataBaseError
-from src.DAO.abstract.base_repository import BaseRepository
+from src.DAO.currency_repository import CurrencyRepository
+from src.exceptions.exceptions import ExchangeRateNotExistError, DataBaseError
+from src.DAO.base_repository import BaseRepository
 from src.models.exchange_rates_model import ExchangeRate
 from src.schemas.base_scheme import BaseSchema
 from src.schemas.exchange_rate_schemas import ExchangeSchemasCodeIn
@@ -86,15 +87,23 @@ class ExchangeRepository(BaseRepository[ExchangeRate, BaseSchema]):
             joinedload(self._get_model().target_currency)
         )
 
-    async def create(self, session: AsyncSession, data: ExchangeSchemasCodeIn) -> ExchangeRate:
-        base_currency = await self.get_by_code(session, data.base_currency_code)
-        target_currency = await self.get_by_code(session, data.target_currency_code)
+    async def create_exc_rate(
+            self, session: AsyncSession,
+            base_code: str,
+            target_code: str,
+            rate: Decimal,
+            with_currencies: bool = True
+    ) -> ExchangeRate:
+        currency_repo = CurrencyRepository()
+
+        base_currency = await currency_repo.get_by_code(session, base_code)
+        target_currency = await currency_repo.get_by_code(session, target_code)
         new_exchange_rate = insert(self._get_model()).values(
             base_currency_id=base_currency.id,
             target_currency_id=target_currency.id,
-            rate=data.rate
+            rate=rate
         ).returning(self._get_model())
+
         res = await session.execute(new_exchange_rate)
         await session.commit()
-        await session.refresh(res)
         return res.scalars().first()

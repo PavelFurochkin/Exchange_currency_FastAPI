@@ -5,8 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from config import db_settings
-from models.base_model import Base
+from src.config import db_settings
+from src.models.base_model import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,6 +18,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 config.set_main_option('sqlalchemy.url', db_settings.database_url + "?async_fallback=True")
+import src.models
 
 target_metadata = Base.metadata
 

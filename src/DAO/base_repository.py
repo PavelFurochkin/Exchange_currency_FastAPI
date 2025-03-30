@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, cast
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, Select
+from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 
 T = TypeVar('T')  # Тип модели SQLAlchemy

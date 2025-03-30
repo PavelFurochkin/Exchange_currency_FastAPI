@@ -1,10 +1,9 @@
-from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DAO.abstract.base_repository import BaseRepository
-from models.currencies_model import Currency
-from schemas.currency_schemas import CurrencySchema
+from src.DAO.base_repository import BaseRepository
+from src.models.currencies_model import Currency
+from src.schemas.currency_schemas import CurrencySchema
 
 
 class CurrencyRepository(BaseRepository[Currency, CurrencySchema]):

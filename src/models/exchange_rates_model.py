@@ -23,11 +23,17 @@ class ExchangeRate(Base):
     )
     rate: Mapped[DECIMAL] = mapped_column(DECIMAL(precision=9, scale=6))
 
-    base_currency: Mapped["Currency"] = relationship(foreign_keys='ExchangeRate.base_currency_id')
-    target_currency: Mapped["Currency"] = relationship(foreign_keys='ExchangeRate.target_currency_id')
+    base_currency: Mapped["Currency"] = relationship(
+        foreign_keys='ExchangeRate.base_currency_id',
+        lazy="joined"
+    )
+    target_currency: Mapped["Currency"] = relationship(
+        foreign_keys='ExchangeRate.target_currency_id',
+        lazy="joined"
+    )
 
     __table_args__ = (
-        UniqueConstraint('base_currency_id', 'target_currency_id', name='unique_currency_rate')
+        UniqueConstraint('base_currency_id', 'target_currency_id', name='unique_currency_rate'),
     )
 
     def __repr__(self):

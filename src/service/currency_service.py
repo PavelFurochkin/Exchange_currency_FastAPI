@@ -1,4 +1,3 @@
-from fastapi import HTTPException, status
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,7 +20,7 @@ class CurrencyService:
         """Получить валюту по коду с валидацией"""
         try:
             currency = await self.repository.get_by_code(session, code)
-            return CurrencySchema.model_validate(currency)
+            return CurrencySchema.model_validate(currency, from_attributes=True)
         except ValidationError:
             raise exceptions.CurrencyAccessError(code)
 
@@ -33,11 +32,11 @@ class CurrencyService:
         """Создать новую валюту"""
         try:
             created_currency = await self.repository.create(session, currency_data)
-            return CurrencySchema.model_validate(created_currency)
+            return CurrencySchema.model_validate(created_currency, from_attributes=True)
         except IntegrityError:
             raise exceptions.AlreadyExistError()
 
     async def get_all_currency(self, session: AsyncSession) -> list[CurrencySchema]:
         currencies = await self.repository.get_all(session)
-        return [CurrencySchema.model_validate(c) for c in currencies]
+        return [CurrencySchema.model_validate(c, from_attributes=True) for c in currencies]
 

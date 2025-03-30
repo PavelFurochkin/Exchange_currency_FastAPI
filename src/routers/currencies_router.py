@@ -2,15 +2,15 @@ from fastapi import APIRouter, Depends, Form, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
-from database import get_db
-from dependencies import get_currency_service
+from src.database import get_db
+from src.dependencies import get_currency_service
 from src.schemas.currency_schemas import CurrencySchema
 from src.service.currency_service import CurrencyService
 
 router = APIRouter(tags=["currencies"])
 
 
-@router.get("/cirrencies")
+@router.get("/currencies")
 async def get_currencies(
         data: Annotated[CurrencyService, Depends(get_currency_service)],
         session: Annotated[AsyncSession, Depends(get_db)],
