@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from asyncpg import NumericValueOutOfRangeError
 from fastapi import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError

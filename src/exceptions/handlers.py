@@ -19,6 +19,13 @@ def register_exception_handlers(app: "FastAPI"):
             content={"message": str(exc)}
         )
 
+    @app.exception_handler(exceptions.OutOfRangeError)
+    async def currency_access(request: Request, exc: exceptions.OutOfRangeError):
+        return JSONResponse(
+            status_code=400,
+            content={"message": str(exc)}
+        )
+
     @app.exception_handler(exceptions.AlreadyExistError)
     async def already_exist(request: Request, exc: exceptions.AlreadyExistError):
         return JSONResponse(

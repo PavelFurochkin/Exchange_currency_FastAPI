@@ -1,12 +1,12 @@
 from decimal import Decimal
 
 from sqlalchemy import select, and_, insert, update
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from src.DAO.currency_repository import CurrencyRepository
-from src.exceptions.exceptions import ExchangeRateNotExistError, DataBaseError
+from src.exceptions.exceptions import ExchangeRateNotExistError, DataBaseError, OutOfRangeError
 from src.DAO.base_repository import BaseRepository
 from src.models.exchange_rates_model import ExchangeRate
 from src.schemas.base_scheme import BaseSchema
@@ -75,7 +75,11 @@ class ExchangeRepository(BaseRepository[ExchangeRate, BaseSchema]):
                 raise ExchangeRateNotExistError(base_code, target_code)
 
             await session.commit()
+            await session.refresh(updated_exc_rate)
             return updated_exc_rate
+        except DBAPIError:
+            await session.rollback()
+            raise OutOfRangeError("3 знака до точки, 6 знаков после")
         except SQLAlchemyError as e:
             await session.rollback()
             raise DataBaseError(e)

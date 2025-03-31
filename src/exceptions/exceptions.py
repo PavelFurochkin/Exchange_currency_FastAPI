@@ -14,6 +14,12 @@ class DataBaseError(CurrencyExchangeError):
         self.message = f'Ошибка доступа к базе данных {error}'
 
 
+class OutOfRangeError(CurrencyExchangeError):
+    """Число не входит в допуск"""
+    def __init__(self, format,  *args):
+        self.message = f'Введеное значение не соответствует формату {format}'
+
+
 class CurrencyAccessError(CurrencyExchangeError):
     """Валюта недоступна"""
     def __init__(self, code, *args):

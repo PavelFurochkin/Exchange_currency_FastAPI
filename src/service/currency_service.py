@@ -1,3 +1,4 @@
+from asyncpg import NumericValueOutOfRangeError
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,6 +34,8 @@ class CurrencyService:
         try:
             created_currency = await self.repository.create(session, currency_data)
             return CurrencySchema.model_validate(created_currency, from_attributes=True)
+        except NumericValueOutOfRangeError:
+            raise exceptions.OutOfRangeError('Code ***, Name 3*-24*, Sign *')
         except IntegrityError:
             raise exceptions.AlreadyExistError()
 

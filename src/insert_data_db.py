@@ -5,11 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.DAO.currency_repository import CurrencyRepository
 from src.DAO.exchange_repository import ExchangeRepository
-from src.exceptions.exceptions import DataBaseError
 from src.schemas.currency_schemas import CurrencySchema
-from src.schemas.exchange_rate_schemas import ExchangeSchemasCodeIn
-from src.service.currency_service import CurrencyService
-from src.service.exchange_rate_service import ExchangeRateService
 from src.database import get_db
 
 list_currencies = [

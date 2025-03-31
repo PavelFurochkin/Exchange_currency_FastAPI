@@ -1,8 +1,8 @@
 from decimal import Decimal
 
-from fastapi import APIRouter, Path, Depends, Query, Form
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing_extensions import Annotated, cast
+from typing_extensions import Annotated
 
 from src.database import get_db
 from src.dependencies import get_exchange_service
