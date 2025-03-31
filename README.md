@@ -24,11 +24,16 @@ REST API для описания валют и обменных курсов. П
 		POSTGRES_HOST = db # Имя контейнера БД. По умолчанию db
 		POSTGRES_PORT = 5432 # Порт БД
 	```
+4. Установить корень REST API в app.js 
+	```
+	nginx/frontend/js/app.js
+ 	const host = "http://<ваш ip>"
+	```
 
-4. Запустите проект:
-	    ```shell
+5. Запустите проект:
+```shell
 	     docker-compose -f docker-compose.dev.yml up -d --build
-	    ```
+```
 
 
 ## REST API
